@@ -102,3 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+# https://github.com/rahulvaish/NaturalLanguageProcessing-Python#text-wrangling

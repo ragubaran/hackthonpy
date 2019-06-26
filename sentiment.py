@@ -12,16 +12,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from collections import Counter
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-
-#function
-def spacy_preprocessor(sentence):
-    sentence = sentence.strip().replace("\n", " ").replace("\r", " ")
-    sentence = sentence.lower()
-    text = parser(sentence)
-    text = [ word.lemma_.lower().strip() if word.lemma_ != "-PRON-" else word.lower_ for word in text ]
-    text = [ word for word in text if word not in stopwords and word not in punctuations ]
-    text = " ".join([i for i in text])
-    return text
+# !python -m spacy download en_core_web_lg
 
 # objects
 nlp = spacy.load('en')
@@ -29,6 +20,25 @@ stopwords = list(STOP_WORDS)
 punctuations = string.punctuation
 analyser = SentimentIntensityAnalyzer()
 parser = English()
+
+#function
+def cleanup_text(word):
+    word = word.strip().replace("\n", " ").replace("\r", " ")
+    word = word.lower()
+    doc = nlp(word)
+    tokens = [tok.lemma_.lower().strip() for tok in doc if tok.lemma_ != '-PRON-']
+    tokens = [tok for tok in tokens if tok not in stopwords and tok not in punctuations]
+    tokens = ' '.join(tokens)
+    return tokens
+
+def spacy_preprocessor(word):
+    word = word.strip().replace("\n", " ").replace("\r", " ")
+    word = word.lower()
+    text = parser(word)
+    text = [ word.lemma_.lower().strip() if word.lemma_ != "-PRON-" else word.lower_ for word in text ]
+    text = [ word for word in text if word not in stopwords and word not in punctuations ]
+    text = " ".join([i for i in text])
+    return text
 
 # data read
 input_file = open ('data.json')
@@ -42,9 +52,14 @@ for item in json_array:
     title = item["title"]
     date_time_obj = datetime.datetime.strptime(item["creation_date"], '%Y-%m-%d %H:%M:%S.%f %Z')
     print(date_time_obj.year)
-    print(title)
+    docx = nlp(title)
+    for token in docx:
+        print(token.text)
     docs.append(spacy_preprocessor(title))
     sentences.append(title)
+
+print("nlp")
+print(docs)
 
 print("vectorize")
 vectorizer = CountVectorizer(max_df=0.8,stop_words=stopwords, max_features=1000000, ngram_range=(1,3))
