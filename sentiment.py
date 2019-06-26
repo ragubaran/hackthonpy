@@ -52,10 +52,11 @@ for item in json_array:
     title = item["title"]
     date_time_obj = datetime.datetime.strptime(item["creation_date"], '%Y-%m-%d %H:%M:%S.%f %Z')
     print(date_time_obj.year)
-    docx = nlp(title)
+    clean = spacy_preprocessor(title)
+    docx = nlp(clean)
     for token in docx:
-        print(token.text)
-    docs.append(spacy_preprocessor(title))
+        print(token.text, token.has_vector, token.pos_, token.is_oov)
+    docs.append(clean)
     sentences.append(title)
 
 print("nlp")
